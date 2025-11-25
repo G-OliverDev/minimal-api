@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using MinimalApi.Dominio.Entidades;
 using MinimalApi.Dominio.Servicos;
+using MinimalApi.DTOs;
 using MinimalApi.Infraestrutura.Db;
 
 namespace Test.Domain.Servicos;
@@ -67,5 +68,34 @@ public class AdministradorServicoTest
 
         // Assert
         Assert.AreEqual(1, admDoBanco?.Id);
+    }
+
+    [TestMethod]
+    public void TestandoLogin()
+    {
+        // Arrange
+        var context = CriarContextoDeTeste();
+        context.Database.ExecuteSqlRaw("TRUNCATE TABLE Administradores");
+
+        var adm = new Administrador();
+        adm.Email = "teste@teste.com";
+        adm.Senha = "teste";
+        adm.Perfil = "Adm";
+
+        var administradorServico = new AdministradorServico(context);
+
+        // Act
+        administradorServico.Incluir(adm);
+
+        var loginDTO = new LoginDTO
+        {
+            Email = adm.Email,
+            Senha = adm.Senha
+        };
+        
+        var admLogado = administradorServico.Login(loginDTO);
+
+        // Assert
+        Assert.AreEqual(1, admLogado?.Id);
     }
 }
